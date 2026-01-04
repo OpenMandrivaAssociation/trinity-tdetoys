@@ -1,6 +1,5 @@
-#
-# Please submit bugfixes or comments via http://www.trinitydesktop.org/
-#
+%bcond clang 1
+%bcond gamin 1
 
 # BUILD WARNING:
 #  Remove qt-devel and qt3-devel and any kde*-devel on your system !
@@ -10,52 +9,41 @@
 %if "%{?tde_version}" == ""
 %define tde_version 14.1.5
 %endif
+%define pkg_rel 3
+
 %define tde_pkg tdetoys
 %define tde_prefix /opt/trinity
-%define tde_bindir %{tde_prefix}/bin
-%define tde_datadir %{tde_prefix}/share
-%define tde_docdir %{tde_datadir}/doc
-%define tde_includedir %{tde_prefix}/include
-%define tde_libdir %{tde_prefix}/%{_lib}
-%define tde_mandir %{tde_datadir}/man
-%define tde_tdeappdir %{tde_datadir}/applications/tde
-%define tde_tdedocdir %{tde_docdir}/tde
-%define tde_tdeincludedir %{tde_includedir}/tde
-%define tde_tdelibdir %{tde_libdir}/trinity
 
-%if 0%{?mdkversion}
+
 %undefine __brp_remove_la_files
 %define dont_remove_libtool_files 1
 %define _disable_rebuild_configure 1
-%endif
 
 # fixes error: Empty %files file …/debugsourcefiles.list
 %define _debugsource_template %{nil}
 
 %define tarball_name %{tde_pkg}-trinity
-%global toolchain %(readlink /usr/bin/cc)
 
 Name:		trinity-%{tde_pkg}
 Summary:	Trinity Desktop Environment - Toys and Amusements
 Version:	%{tde_version}
-Release:	%{?!preversion:1}%{?preversion:0_%{preversion}}%{?dist}
+Release:	%{?!preversion:%{pkg_rel}}%{?preversion:0_%{preversion}}%{?dist}
 Group:		Amusements/Graphics
 URL:		http://www.trinitydesktop.org/
 
-%if 0%{?suse_version}
-License:	GPL-2.0+
-%else
 License:	GPLv2+
-%endif
 
-#Vendor:		Trinity Project
-#Packager:	Francois Andriot <francois.andriot@free.fr>
-
-Prefix:		%{tde_prefix}
 
 Source0:	https://mirror.ppa.trinitydesktop.org/trinity/releases/R%{tde_version}/main/core/%{tarball_name}-%{version}%{?preversion:~%{preversion}}.tar.xz
 
-BuildRequires:  cmake make
+BuildSystem:    cmake
+
+BuildOption:    -DCMAKE_BUILD_TYPE="RelWithDebInfo"
+BuildOption:    -DCMAKE_INSTALL_PREFIX=%{tde_prefix}
+BuildOption:    -DINCLUDE_INSTALL_DIR=%{tde_prefix}/include/tde
+BuildOption:    -DPKGCONFIG_INSTALL_DIR=%{tde_prefix}/%{_lib}/pkgconfig
+BuildOption:    -DBUILD_ALL=ON
+BuildOption:    -DWITH_GCC_VISIBILITY=%{!?with_clang:ON}%{?with_clang:OFF}
 
 # Trinity dependencies
 BuildRequires: trinity-tdelibs-devel >= %{tde_version}
@@ -64,21 +52,11 @@ BuildRequires: trinity-kicker >= %{tde_version}
 BuildRequires: trinity-tdebase-devel >= %{tde_version}
 
 BuildRequires:	trinity-tde-cmake >= %{tde_version}
-%if "%{?toolchain}" != "clang"
-BuildRequires:	gcc-c++
-%endif
+
+%{!?with_clang:BuildRequires:	gcc-c++}
+
 BuildRequires:	pkgconfig
 BuildRequires:	fdupes
-
-# SUSE desktop files utility
-%if 0%{?suse_version}
-BuildRequires:	update-desktop-files
-%endif
-
-%if 0%{?opensuse_bs} && 0%{?suse_version}
-# for xdg-menu script
-BuildRequires:	brp-check-trinity
-%endif
 
 BuildRequires: desktop-file-utils
 BuildRequires: gettext
@@ -87,11 +65,7 @@ BuildRequires: gettext
 BuildRequires:	pkgconfig(libidn)
 
 # GAMIN support
-#  Not on openSUSE.
-%if ( 0%{?rhel} && 0%{?rhel} <= 8 ) || ( 0%{?fedora} && 0%{?fedora} <= 33 ) || 0%{?mgaversion} || 0%{?mdkversion}
-%define with_gamin 1
-BuildRequires:	pkgconfig(gamin)
-%endif
+%{?with_gamin:BuildRequires:	pkgconfig(gamin)}
 
 # ACL support
 BuildRequires:  pkgconfig(libacl)
@@ -162,12 +136,12 @@ This package is part of Trinity, and a component of the TDE toys module.
 %files -n trinity-amor
 %defattr(-,root,root,-)
 %doc AUTHORS COPYING README
-%{tde_bindir}/amor
-%{tde_datadir}/apps/amor/
-%{tde_tdeappdir}/amor.desktop
-%{tde_datadir}/icons/hicolor/*/apps/amor.png
-%{tde_tdedocdir}/HTML/en/amor/
-%{tde_mandir}/man*/amor.*
+%{tde_prefix}/bin/amor
+%{tde_prefix}/share/apps/amor/
+%{tde_prefix}/share/applications/tde/amor.desktop
+%{tde_prefix}/share/icons/hicolor/*/apps/amor.png
+%{tde_prefix}/share/doc/tde/HTML/en/amor/
+%{tde_prefix}/share/man/man*/amor.*
 
 ##########
 
@@ -186,9 +160,9 @@ This package is part of Trinity, and a component of the TDE toys module.
 %files -n trinity-eyesapplet
 %defattr(-,root,root,-)
 %doc AUTHORS COPYING README
-%{tde_tdelibdir}/eyes_panelapplet.la
-%{tde_tdelibdir}/eyes_panelapplet.so
-%{tde_datadir}/apps/kicker/applets/eyesapplet.desktop
+%{tde_prefix}/%{_lib}/trinity/eyes_panelapplet.la
+%{tde_prefix}/%{_lib}/trinity/eyes_panelapplet.so
+%{tde_prefix}/share/apps/kicker/applets/eyesapplet.desktop
 
 ##########
 
@@ -206,9 +180,9 @@ This package is part of Trinity, and a component of the TDE toys module.
 %files -n trinity-fifteenapplet
 %defattr(-,root,root,-)
 %doc AUTHORS COPYING README
-%{tde_tdelibdir}/fifteen_panelapplet.la
-%{tde_tdelibdir}/fifteen_panelapplet.so
-%{tde_datadir}/apps/kicker/applets/kfifteenapplet.desktop
+%{tde_prefix}/%{_lib}/trinity/fifteen_panelapplet.la
+%{tde_prefix}/%{_lib}/trinity/fifteen_panelapplet.so
+%{tde_prefix}/share/apps/kicker/applets/kfifteenapplet.desktop
 
 ##########
 
@@ -226,12 +200,12 @@ This package is part of Trinity, and a component of the TDE toys module.
 %files -n trinity-kmoon
 %defattr(-,root,root,-)
 %doc AUTHORS COPYING README
-%{tde_tdelibdir}/kmoon_panelapplet.la
-%{tde_tdelibdir}/kmoon_panelapplet.so
-%{tde_datadir}/apps/kicker/applets/kmoonapplet.desktop
-%{tde_datadir}/apps/kmoon/
-%{tde_datadir}/icons/hicolor/*/apps/kmoon.png
-%{tde_tdedocdir}/HTML/en/kmoon/
+%{tde_prefix}/%{_lib}/trinity/kmoon_panelapplet.la
+%{tde_prefix}/%{_lib}/trinity/kmoon_panelapplet.so
+%{tde_prefix}/share/apps/kicker/applets/kmoonapplet.desktop
+%{tde_prefix}/share/apps/kmoon/
+%{tde_prefix}/share/icons/hicolor/*/apps/kmoon.png
+%{tde_prefix}/share/doc/tde/HTML/en/kmoon/
 
 ##########
 
@@ -249,12 +223,12 @@ This package is part of Trinity, and a component of the TDE toys module.
 %files -n trinity-kodo
 %defattr(-,root,root,-)
 %doc AUTHORS COPYING README
-%{tde_bindir}/kodo
-%{tde_tdeappdir}/kodo.desktop
-%{tde_datadir}/apps/kodo/
-%{tde_datadir}/icons/hicolor/*/apps/kodo.png
-%{tde_tdedocdir}/HTML/en/kodo/
-%{tde_mandir}/man*/kodo.*
+%{tde_prefix}/bin/kodo
+%{tde_prefix}/share/applications/tde/kodo.desktop
+%{tde_prefix}/share/apps/kodo/
+%{tde_prefix}/share/icons/hicolor/*/apps/kodo.png
+%{tde_prefix}/share/doc/tde/HTML/en/kodo/
+%{tde_prefix}/share/man/man*/kodo.*
 
 ##########
 
@@ -279,12 +253,12 @@ This package is part of Trinity, and a component of the TDE toys module.
 %files -n trinity-kteatime
 %defattr(-,root,root,-)
 %doc AUTHORS COPYING README
-%{tde_bindir}/kteatime
-%{tde_tdeappdir}/kteatime.desktop
-%{tde_datadir}/apps/kteatime/
-%{tde_datadir}/icons/hicolor/*/apps/kteatime.png
-%{tde_tdedocdir}/HTML/en/kteatime/
-%{tde_mandir}/man*/kteatime.*
+%{tde_prefix}/bin/kteatime
+%{tde_prefix}/share/applications/tde/kteatime.desktop
+%{tde_prefix}/share/apps/kteatime/
+%{tde_prefix}/share/icons/hicolor/*/apps/kteatime.png
+%{tde_prefix}/share/doc/tde/HTML/en/kteatime/
+%{tde_prefix}/share/man/man*/kteatime.*
 
 ##########
 
@@ -300,11 +274,11 @@ This package is part of Trinity, and a component of the TDE toys module.
 %files -n trinity-ktux
 %defattr(-,root,root,-)
 %doc AUTHORS COPYING README
-%{tde_bindir}/ktux
-%{tde_datadir}/apps/ktux/
-%{tde_datadir}/applnk/System/ScreenSavers/ktux.desktop
-%{tde_datadir}/icons/hicolor/*/apps/ktux.png
-%{tde_mandir}/man*/ktux.*
+%{tde_prefix}/bin/ktux
+%{tde_prefix}/share/apps/ktux/
+%{tde_prefix}/share/applnk/System/ScreenSavers/ktux.desktop
+%{tde_prefix}/share/icons/hicolor/*/apps/ktux.png
+%{tde_prefix}/share/man/man*/ktux.*
 
 ##########
 
@@ -328,34 +302,34 @@ This package is part of Trinity, and a component of the TDE toys module.
 %files -n trinity-kweather
 %defattr(-,root,root,-)
 %doc AUTHORS COPYING README
-%{tde_bindir}/kweatherservice
-%{tde_bindir}/kweatherreport
-%{tde_libdir}/libtdeinit_kweatherreport.so
-%{tde_libdir}/libtdeinit_kweatherreport.la
-%{tde_tdelibdir}/kcm_weatherapplet.so
-%{tde_tdelibdir}/kcm_weatherapplet.la
-%{tde_tdelibdir}/kcm_weatherservice.so
-%{tde_tdelibdir}/kcm_weatherservice.la
-%{tde_tdelibdir}/kcm_weatherstations.so
-%{tde_tdelibdir}/kcm_weatherstations.la
-%{tde_tdelibdir}/kweatherreport.so
-%{tde_tdelibdir}/kweatherreport.la
-%{tde_tdelibdir}/weather_panelapplet.la
-%{tde_tdelibdir}/weather_panelapplet.so
-%{tde_tdelibdir}/weather_sidebar.la
-%{tde_tdelibdir}/weather_sidebar.so
-%{tde_datadir}/apps/kicker/applets/kweather.desktop
-%{tde_datadir}/apps/konqsidebartng/
-%{tde_datadir}/apps/kweather/
-%{tde_datadir}/apps/kweatherservice/
-%{tde_datadir}/icons/hicolor/*/apps/kweather.png
-%{tde_datadir}/services/kweatherservice.desktop
-%{tde_datadir}/services/kcmweatherapplet.desktop
-%{tde_datadir}/services/kcmweatherservice.desktop
-%{tde_datadir}/services/kcmweatherstations.desktop
-%{tde_tdedocdir}/HTML/en/kweather/
-%{tde_mandir}/man*/kweatherreport.*
-%{tde_mandir}/man*/kweatherservice.*
+%{tde_prefix}/bin/kweatherservice
+%{tde_prefix}/bin/kweatherreport
+%{tde_prefix}/%{_lib}/libtdeinit_kweatherreport.so
+%{tde_prefix}/%{_lib}/libtdeinit_kweatherreport.la
+%{tde_prefix}/%{_lib}/trinity/kcm_weatherapplet.so
+%{tde_prefix}/%{_lib}/trinity/kcm_weatherapplet.la
+%{tde_prefix}/%{_lib}/trinity/kcm_weatherservice.so
+%{tde_prefix}/%{_lib}/trinity/kcm_weatherservice.la
+%{tde_prefix}/%{_lib}/trinity/kcm_weatherstations.so
+%{tde_prefix}/%{_lib}/trinity/kcm_weatherstations.la
+%{tde_prefix}/%{_lib}/trinity/kweatherreport.so
+%{tde_prefix}/%{_lib}/trinity/kweatherreport.la
+%{tde_prefix}/%{_lib}/trinity/weather_panelapplet.la
+%{tde_prefix}/%{_lib}/trinity/weather_panelapplet.so
+%{tde_prefix}/%{_lib}/trinity/weather_sidebar.la
+%{tde_prefix}/%{_lib}/trinity/weather_sidebar.so
+%{tde_prefix}/share/apps/kicker/applets/kweather.desktop
+%{tde_prefix}/share/apps/konqsidebartng/
+%{tde_prefix}/share/apps/kweather/
+%{tde_prefix}/share/apps/kweatherservice/
+%{tde_prefix}/share/icons/hicolor/*/apps/kweather.png
+%{tde_prefix}/share/services/kweatherservice.desktop
+%{tde_prefix}/share/services/kcmweatherapplet.desktop
+%{tde_prefix}/share/services/kcmweatherservice.desktop
+%{tde_prefix}/share/services/kcmweatherstations.desktop
+%{tde_prefix}/share/doc/tde/HTML/en/kweather/
+%{tde_prefix}/share/man/man*/kweatherreport.*
+%{tde_prefix}/share/man/man*/kweatherservice.*
 
 ##########
 
@@ -379,75 +353,23 @@ This package is part of Trinity, and a component of the TDE toys module.
 %files -n trinity-kworldclock
 %defattr(-,root,root,-)
 %doc AUTHORS COPYING README
-%{tde_bindir}/kworldclock
-%{tde_tdelibdir}/ww_panelapplet.la
-%{tde_tdelibdir}/ww_panelapplet.so
-%{tde_tdeappdir}/kworldclock.desktop
-%{tde_datadir}/apps/kdesktop/programs/kdeworld.desktop
-%{tde_datadir}/apps/kicker/applets/kwwapplet.desktop
-%{tde_datadir}/apps/kworldclock/
-%{tde_datadir}/icons/hicolor/*/apps/kworldclock.png
-%{tde_tdedocdir}/HTML/en/kworldclock/
-%{tde_mandir}/man*/kworldclock.*
+%{tde_prefix}/bin/kworldclock
+%{tde_prefix}/%{_lib}/trinity/ww_panelapplet.la
+%{tde_prefix}/%{_lib}/trinity/ww_panelapplet.so
+%{tde_prefix}/share/applications/tde/kworldclock.desktop
+%{tde_prefix}/share/apps/kdesktop/programs/kdeworld.desktop
+%{tde_prefix}/share/apps/kicker/applets/kwwapplet.desktop
+%{tde_prefix}/share/apps/kworldclock/
+%{tde_prefix}/share/icons/hicolor/*/apps/kworldclock.png
+%{tde_prefix}/share/doc/tde/HTML/en/kworldclock/
+%{tde_prefix}/share/man/man*/kworldclock.*
 
-##########
-
-%if 0%{?suse_version} && 0%{?opensuse_bs} == 0
-%debug_package
-%endif
-
-##########
-
-%prep
-%autosetup -n %{tarball_name}-%{version}%{?preversion:~%{preversion}}
-
-
-%build
+%conf -p
 unset QTDIR QTINC QTLIB
-export PATH="%{tde_bindir}:${PATH}"
-
-if ! rpm -E %%cmake|grep -e 'cd build\|cd ${CMAKE_BUILD_DIR:-build}'; then
-  %__mkdir_p build
-  cd build
-fi
-
-%cmake \
-  -DCMAKE_BUILD_TYPE="RelWithDebInfo" \
-  -DCMAKE_C_FLAGS="${RPM_OPT_FLAGS}" \
-  -DCMAKE_CXX_FLAGS="${RPM_OPT_FLAGS}" \
-  -DCMAKE_SKIP_RPATH=OFF \
-  -DCMAKE_SKIP_INSTALL_RPATH=OFF \
-  -DCMAKE_INSTALL_RPATH="%{tde_libdir}" \
-  -DCMAKE_VERBOSE_MAKEFILE=ON \
-  -DWITH_GCC_VISIBILITY=OFF \
-  \
-  -DCMAKE_INSTALL_PREFIX="%{tde_prefix}" \
-  -DBIN_INSTALL_DIR="%{tde_bindir}" \
-  -DDOC_INSTALL_DIR="%{tde_docdir}" \
-  -DINCLUDE_INSTALL_DIR="%{tde_tdeincludedir}" \
-  -DLIB_INSTALL_DIR="%{tde_libdir}" \
-  -DPKGCONFIG_INSTALL_DIR="%{tde_libdir}/pkgconfig" \
-  -DSHARE_INSTALL_PREFIX="%{tde_datadir}" \
-  \
-  -DBUILD_ALL=ON \
-  ..
-
-%__make %{?_smp_mflags}
+export PATH="%{tde_prefix}/bin:${PATH}"
 
 
-%install
-export PATH="%{tde_bindir}:${PATH}"
-%__make install DESTDIR=%{buildroot} -C build
-
+%install -a
 # Useless include file from Amor
-%__rm -f %{buildroot}%{tde_tdeincludedir}/AmorIface.h
-
-# Updates applications categories for openSUSE
-%if 0%{?suse_version}
-%suse_update_desktop_file -r kworldclock Utility Clock
-%suse_update_desktop_file -r kteatime    Applet
-%suse_update_desktop_file -r amor        Amusement
-%suse_update_desktop_file -r kodo        Amusement 
-%suse_update_desktop_file ktux        Screensaver
-%endif
+%__rm -f %{buildroot}%{tde_prefix}/include/tde/AmorIface.h
 
