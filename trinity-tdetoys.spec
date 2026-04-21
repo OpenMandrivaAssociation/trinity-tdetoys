@@ -6,11 +6,6 @@
 #  Having KDE libraries may cause FTBFS here !
 
 # TDE variables
-%if "%{?tde_version}" == ""
-%define tde_version 14.1.5
-%endif
-%define pkg_rel 3
-
 %define tde_pkg tdetoys
 %define tde_prefix /opt/trinity
 
@@ -26,15 +21,15 @@
 
 Name:		trinity-%{tde_pkg}
 Summary:	Trinity Desktop Environment - Toys and Amusements
-Version:	%{tde_version}
-Release:	%{?!preversion:%{pkg_rel}}%{?preversion:0_%{preversion}}%{?dist}
+Version:	14.1.5
+Release:	4
 Group:		Amusements/Graphics
 URL:		http://www.trinitydesktop.org/
 
 License:	GPLv2+
 
 
-Source0:	https://mirror.ppa.trinitydesktop.org/trinity/releases/R%{tde_version}/main/core/%{tarball_name}-%{version}%{?preversion:~%{preversion}}.tar.xz
+Source0:	https://mirror.ppa.trinitydesktop.org/trinity/releases/R%{version}/main/core/%{tarball_name}-%{version}.tar.xz
 
 BuildSystem:    cmake
 
@@ -46,12 +41,12 @@ BuildOption:    -DBUILD_ALL=ON
 BuildOption:    -DWITH_GCC_VISIBILITY=%{!?with_clang:ON}%{?with_clang:OFF}
 
 # Trinity dependencies
-BuildRequires: trinity-tdelibs-devel >= %{tde_version}
-BuildRequires: trinity-kdesktop >= %{tde_version}
-BuildRequires: trinity-kicker >= %{tde_version}
-BuildRequires: trinity-tdebase-devel >= %{tde_version}
+BuildRequires: trinity-tdelibs-devel >= %{version}
+BuildRequires: trinity-kdesktop >= %{version}
+BuildRequires: trinity-kicker >= %{version}
+BuildRequires: trinity-tdebase-devel >= %{version}
 
-BuildRequires:	trinity-tde-cmake >= %{tde_version}
+BuildRequires:	trinity-tde-cmake >= %{version}
 
 %{!?with_clang:BuildRequires:	gcc-c++}
 
@@ -83,19 +78,19 @@ BuildRequires:  pkgconfig(sm)
 BuildRequires:  pkgconfig(xext)
 
 
-Obsoletes:		trinity-kdetoys < %{?epoch:%{epoch}:}%{version}-%{release}
-Provides:		trinity-kdetoys = %{?epoch:%{epoch}:}%{version}-%{release}
+Obsoletes:		trinity-kdetoys < %{EVRD}
+Provides:		trinity-kdetoys = %{EVRD}
 
 # Metapackage
-Requires: trinity-amor = %{?epoch:%{epoch}:}%{version}-%{release}
-Requires: trinity-eyesapplet = %{?epoch:%{epoch}:}%{version}-%{release}
-Requires: trinity-fifteenapplet = %{?epoch:%{epoch}:}%{version}-%{release}
-Requires: trinity-kmoon = %{?epoch:%{epoch}:}%{version}-%{release}
-Requires: trinity-kodo = %{?epoch:%{epoch}:}%{version}-%{release}
-Requires: trinity-kteatime = %{?epoch:%{epoch}:}%{version}-%{release}
-Requires: trinity-ktux = %{?epoch:%{epoch}:}%{version}-%{release}
-Requires: trinity-kweather = %{?epoch:%{epoch}:}%{version}-%{release}
-Requires: trinity-kworldclock = %{?epoch:%{epoch}:}%{version}-%{release}
+Requires: trinity-amor = %{EVRD}
+Requires: trinity-eyesapplet = %{EVRD}
+Requires: trinity-fifteenapplet = %{EVRD}
+Requires: trinity-kmoon = %{EVRD}
+Requires: trinity-kodo = %{EVRD}
+Requires: trinity-kteatime = %{EVRD}
+Requires: trinity-ktux = %{EVRD}
+Requires: trinity-kweather = %{EVRD}
+Requires: trinity-kworldclock = %{EVRD}
 
 
 %description
@@ -149,7 +144,7 @@ This package is part of Trinity, and a component of the TDE toys module.
 Summary:	eyes applet for Trinity
 Group:		Amusements/Graphics
 
-Requires:	trinity-kicker >= %{tde_version}
+Requires:	trinity-kicker >= %{version}
 
 %description -n trinity-eyesapplet
 An applet for the TDE panel containing a pair of eyes that follow your mouse
@@ -190,7 +185,7 @@ This package is part of Trinity, and a component of the TDE toys module.
 Summary:	moon phase indicator for Trinity
 Group:		Amusements/Graphics
 
-Requires:	trinity-kicker >= %{tde_version}
+Requires:	trinity-kicker >= %{version}
 
 %description -n trinity-kmoon
 An applet for the TDE panel that displays the current phase of the moon.
@@ -286,7 +281,7 @@ This package is part of Trinity, and a component of the TDE toys module.
 Summary:	weather display applet for Trinity
 Group:		Amusements/Graphics
 
-Requires:	trinity-kicker >= %{tde_version}
+Requires:	trinity-kicker >= %{version}
 
 %description -n trinity-kweather
 An applet for the TDE panel that displays your area's current weather.
@@ -337,8 +332,8 @@ This package is part of Trinity, and a component of the TDE toys module.
 Summary:	earth watcher for Trinity
 Group:		Amusements/Graphics
 
-Requires:	trinity-kdesktop >= %{tde_version}
-Requires:	trinity-kicker >= %{tde_version}
+Requires:	trinity-kdesktop >= %{version}
+Requires:	trinity-kicker >= %{version}
 
 %description -n trinity-kworldclock
 Displays where in the world it is light and dark depending on time, as
